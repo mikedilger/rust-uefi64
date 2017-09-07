@@ -1,6 +1,9 @@
 [package]
 name = "uefi64"
 version = "0.1.0"
+description = "Rust UEFI crate (64-bit only) for bootloaders and operating systems"
 authors = ["Mike Dilger <mike@optcomp.nz>"]
+license = "MIT OR Apache-2.0"
+keywords = [ "uefi" ]
 
 [dependencies]
