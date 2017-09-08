@@ -23,14 +23,10 @@
 extern crate bitflags;
 
 pub mod types;
-pub use self::types::*;
 
 pub mod system_table;
-pub use self::system_table::SystemTable;
 
 pub mod boot_services;
-pub use self::boot_services::BootServices;
 
-pub mod memory_services;
-pub use self::memory_services::{MemoryType, PhysicalAddress, VirtualAddress,
-                                MemoryDescriptor, GetMemoryMap};
+mod memory_services;
+pub use self::memory_services::types::*;

@@ -4,6 +4,7 @@
 /// This type is not yet implemented. You are encouraged to submit a pull request.
 pub type NotImplemented = *const ();
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 #[repr(C)] // align 64-bit
 pub struct Guid(pub u64, pub u64);
 
@@ -144,21 +145,26 @@ pub type Lba = u64;
 
 pub type Tpl = usize;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 #[repr(C)]
 pub struct MacAddress(pub [u8; 32]);
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 #[repr(C)]
 pub struct Ipv4Address(pub [u8; 4]);
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 #[repr(C)]
 pub struct Ipv6Address(pub [u8; 16]);
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 #[repr(C)] // align 4-byte
 pub struct IpAddress(pub [u8; 16]);
 
 // for enums, use #[repr(u32)]
 
 /// The header type for all table structures
+#[derive(Debug, Clone)]
 #[repr(C)]
 pub struct TableHeader {
     /// Identifies the type of table that follows
