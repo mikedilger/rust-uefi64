@@ -30,4 +30,3 @@ pub mod boot_services;
 
 mod memory_services;
 pub use self::memory_services::types::*;
-pub use self::memory_services::allocate_pages;

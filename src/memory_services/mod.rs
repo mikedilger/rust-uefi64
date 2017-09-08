@@ -48,32 +48,3 @@ pub type AllocatePool = unsafe extern "win64" fn(
 pub type FreePool = unsafe extern "win64" fn(
     // pointer to the buffer to free
     buffer: *mut () ) -> Status;
-
-use boot_services::BootServices;
-
-/// Allocates pages of a particular type
-pub fn allocate_pages(
-    // A reference to the Boot Services structure
-    boot_services: &BootServices,
-    // The type of allocation to perform
-    allocation_type: AllocateType,
-    // The type of memory to allocate
-    memory_type: MemoryType,
-    // The number of contiguous 4K pages to allocate
-    pages: usize,
-    // An optional PhysicalAddress, required if allocation_type is MaxAddress or Address.
-    memory: Option<PhysicalAddress>)
-    -> Result<PhysicalAddress, Status>
-{
-    assert!(allocation_type==AllocateType::AnyPages || memory.is_some());
-    let mut addr: PhysicalAddress = match memory {
-        Some(pa) => pa,
-        None => unsafe { ::core::mem::uninitialized() }
-    };
-    unsafe {
-        match (boot_services.allocate_pages)(allocation_type, memory_type, pages, &mut addr) {
-            STATUS_SUCCESS => Ok(addr),
-            status => Err(status),
-        }
-    }
-}
