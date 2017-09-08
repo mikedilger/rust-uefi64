@@ -4,27 +4,22 @@
 pub mod types;
 pub use self::types::*;
 
+use core::mem::size_of;
 use types::*;
 
-/// Allocates pages of a particular type
 pub type AllocatePages = unsafe extern "win64" fn (
     type_: AllocateType,
     memory_type: MemoryType,
     pages: usize,
-    // The pointer to physical memory allocated.  May be required as an input paramter
-    // as well depending on `type_`
     memory: *mut PhysicalAddress) -> Status;
 
-/// Frees allocated pages
 pub type FreePages = unsafe extern "win64" fn(
-    // The base physical address of the pages to be freed
     memory: PhysicalAddress,
-    // The number of contiguous 4K pages to free
     pages: usize) -> Status;
 
 /// Returns the current boot services memory map and memory map key
 pub type GetMemoryMap = unsafe extern "win64" fn(
-    // The size of `memory_map`.  On failure, firmware will write the size the
+    // The size of `memory_map` in bytes. On failure, firmware will write the size the
     // map needs to be here, so you can try again.
     memory_map_size: *mut usize,
     // An array of MemoryDescriptors, to contain the output
@@ -51,17 +46,23 @@ pub type FreePool = unsafe extern "win64" fn(
 
 use boot_services::BootServices;
 
-/// Allocates pages of a particular type
+/// Allocates pages of a particular type.
+///
+/// `boot_services`: A reference to the Boot Services structure
+///
+/// `allocation_type`: The type of allocation to perform
+///
+/// `memory_type`: The type of memory to allocate
+///
+/// `pages`: The number of contiguous 4K pages to allocate
+///
+/// `memory`: An optional PhysicalAddress, required if `allocation_type` is `MaxAddress`
+///           or `Address`
 pub fn allocate_pages(
-    // A reference to the Boot Services structure
     boot_services: &BootServices,
-    // The type of allocation to perform
     allocation_type: AllocateType,
-    // The type of memory to allocate
     memory_type: MemoryType,
-    // The number of contiguous 4K pages to allocate
     pages: usize,
-    // An optional PhysicalAddress, required if allocation_type is MaxAddress or Address.
     memory: Option<PhysicalAddress>)
     -> Result<PhysicalAddress, Status>
 {
@@ -74,6 +75,86 @@ pub fn allocate_pages(
         match (boot_services.allocate_pages)(allocation_type, memory_type, pages, &mut addr) {
             STATUS_SUCCESS => Ok(addr),
             status => Err(status),
+        }
+    }
+}
+
+/// Frees allocated pages.
+///
+/// `boot_services`: A reference to the Boot Services structure
+///
+/// `memory`: The base physical address of the pages to be freed
+///
+/// `pages`: The number of contiguous 4K pages to free
+pub fn free_pages(
+    boot_services: &BootServices,
+    memory: PhysicalAddress,
+    pages: usize) -> Result<(), Status>
+{
+    unsafe {
+        match (boot_services.free_pages)(memory, pages) {
+            STATUS_SUCCESS => Ok(()),
+            status => Err(status),
+        }
+    }
+}
+
+/// A successful result from get_memory_map()
+pub struct MemoryMap<'a> {
+    /// The memory map
+    pub map: &'a mut [MemoryDescriptor],
+    /// The map_key, which may be required later for other UEFI calls.
+    pub map_key: usize,
+    /// The size, in bytes, of an individual `MemoryDescriptor` (returned by the firmware,
+    /// but should not differ from the size of the type in this crate, unless a new UEFI
+    /// version has it different)
+    pub descriptor_size: usize,
+    /// The version number associated with the `MemoryDescriptor` type.
+    pub descriptor_version: u32,
+}
+
+/// An unsuccessful result from get_memory_map()
+pub struct MemoryMapFailure {
+    /// The return status
+    pub status: Status,
+    /// If status was `STATUS_BUFFER_TOO_SMALL`, this will be Some(size) in bytes of memory
+    /// that is required, so that you can try again with a bigger memory buffer.
+    pub size_required: Option<usize>,
+}
+
+/// Either fills the memory with MemoryDescriptors and returns some MemoryMap, or else
+/// it fails and returns a MemoryMapFailure structure with details.
+pub fn get_memory_map<'a>(
+    // A reference to the Boot Services structure
+    boot_services: &BootServices,
+    // Memory that
+    memory: &'a mut [MemoryDescriptor])
+    -> Result<MemoryMap<'a>, MemoryMapFailure>
+{
+    let mut len = memory.len() * size_of::<MemoryDescriptor>();
+    let mut map: MemoryMap = unsafe { ::core::mem::uninitialized() };
+
+    unsafe {
+        match (boot_services.get_memory_map)(&mut len,
+                                             memory.as_mut_ptr(),
+                                             &mut map.map_key,
+                                             &mut map.descriptor_size,
+                                             &mut map.descriptor_version)
+        {
+            STATUS_SUCCESS => {
+                let index = len / size_of::<MemoryDescriptor>();
+                let (filled, _empty) =  memory.split_at_mut(index);
+                map.map = filled;
+                Ok(map)
+            },
+            STATUS_BUFFER_TOO_SMALL => Err(MemoryMapFailure {
+                status: STATUS_BUFFER_TOO_SMALL,
+                size_required: Some(len),
+            }),
+            status => Err(MemoryMapFailure {
+                status: status,
+                size_required: None,
+            }),
         }
     }
 }
