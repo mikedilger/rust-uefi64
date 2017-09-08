@@ -2,6 +2,7 @@
 // Refer to LICENSE-MIT and LICENSE-APACHE files
 
 use types::*;
+use memory_services::{AllocatePages, FreePages, GetMemoryMap, AllocatePool, FreePool};
 
 // #define EFI_BOOT_SERVICES_SIGNATURE 0x56524553544f4f42
 
@@ -19,23 +20,23 @@ pub struct BootServices {
 
     /// Memory Service
     /// Allocates pages of a particular type
-    pub allocate_pages: NotImplemented,
+    pub allocate_pages: AllocatePages,
 
     /// Memory Service
     /// Frees allocated pages
-    pub free_pages: NotImplemented,
+    pub free_pages: FreePages,
 
     /// Memory Service
     /// Returns the current boot services memory map and memory map key
-    pub get_memory_map: NotImplemented,
+    pub get_memory_map: GetMemoryMap,
 
     /// Memory Service
     /// Allocates a pool of a particular type
-    pub allocate_pool: NotImplemented,
+    pub allocate_pool: AllocatePool,
 
     /// Memory Service
     /// Frees allocated pool
-    pub free_pool: NotImplemented,
+    pub free_pool: FreePool,
 
     /// Event & Timer Service
     /// Creates a general-purpose event structure
