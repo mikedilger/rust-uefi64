@@ -28,7 +28,7 @@ pub struct SystemTable {
     /// Pointer to RuntimeServices table
     pub runtime_services: NotImplemented,
     /// Pointer to BootServices table
-    pub boot_services: *mut BootServices,
+    pub boot_services: *const BootServices,
     /// The number of entries in the configuration_table (next field)
     pub number_of_table_entries: usize,
     /// A pointer to an array of system configuration table.
