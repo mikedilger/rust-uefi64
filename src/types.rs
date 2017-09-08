@@ -1,6 +1,8 @@
 // Copyright 2017 Michael Dilger
 // Refer to LICENSE-MIT and LICENSE-APACHE files
 
+pub type NotImplemented = *const ();
+
 #[repr(C)] // align 64-bit
 pub struct Guid(pub u64, pub u64);
 
