@@ -2,6 +2,7 @@
 // Refer to LICENSE-MIT and LICENSE-APACHE files
 
 use types::*;
+use boot_services::BootServices;
 
 // const SYSTEM_TABLE_SIGNATURE: u64 = 0x5453595320494249;
 
@@ -27,7 +28,7 @@ pub struct SystemTable {
     /// Pointer to RuntimeServices table
     pub runtime_services: NotImplemented,
     /// Pointer to BootServices table
-    pub boot_services: NotImplemented,
+    pub boot_services: *mut BootServices,
     /// The number of entries in the configuration_table (next field)
     pub number_of_table_entries: usize,
     /// A pointer to an array of system configuration table.

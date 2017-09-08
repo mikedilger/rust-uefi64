@@ -24,3 +24,6 @@ pub use self::types::*;
 
 pub mod system_table;
 pub use self::system_table::SystemTable;
+
+pub mod boot_services;
+pub use self::boot_services::BootServices;
