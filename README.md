@@ -1,9 +1,9 @@
 # rust-uefi64
 
-This crate is for supporting UEFI applications such as bootloaders and operating systems.
+NOTE:  The author has stopped work on this crate, as it turned out, in his case, he did not
+need it.
 
-THIS IS EARLY DAYS, and in particular I have not tested or otherwise used this crate yet
-myself!
+This crate is for supporting UEFI applications such as bootloaders and operating systems.
 
 ### Links
 
